@@ -1,0 +1,84 @@
+﻿@page "/department/create"
+@page "/department/edit/{id:int}"
+
+@inject IDepartmentRepository _departmentRepository
+@inject NavigationManager _navigationManager
+
+<div class="row my-2">
+	<h3 class="card-title text-primary mb-3 ml-3">@Title Department</h3>
+	<div class="col-10">
+		@if (IsLoading)
+		{
+			<div class="text-center">
+				<img src="/images/loader.gif">
+			</div>
+		}
+		else
+		{
+			<EditForm Model="Department" OnValidSubmit="UpsertDepartment">
+				<DataAnnotationsValidator/>
+				<ValidationSummary />
+				<div class="form-group">
+					<label>Department Name</label>
+					<InputText @bind-Value="Department.Name" class="form-control"></InputText>
+					<ValidationMessage For="()=>Department.Name"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Department Code</label>
+					<InputText @bind-Value="Department.Code" class="form-control"></InputText>
+					<ValidationMessage For="()=>Department.Code"></ValidationMessage>
+				</div>
+				<div class="form-group py-2">
+					<button class="btn btn-primary">@Title</button>
+					<NavLink href="department" class="btn btn-secondary">Back to Index</NavLink>
+				</div>
+			</EditForm>
+		}
+
+	</div>
+</div>
+
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private DepartmentDto Department { get; set; } = new DepartmentDto();
+	private string Title { get; set; } = "Create";
+	private bool IsLoading { get; set; } = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (Id == 0)
+		{
+			// create
+			IsLoading = false;
+		}
+		else
+		{
+			// update
+			Title = "Update";
+			await Task.Run(LoadDepartment);
+		}
+	}
+	private void LoadDepartment()
+	{
+		Department = _departmentRepository.Get(Id);
+		IsLoading = false;
+	}
+
+	private void UpsertDepartment()
+	{
+		if (Id == 0)
+		{
+			//create
+			_departmentRepository.Create(Department);
+		}
+		else
+		{
+			//update
+			_departmentRepository.Update(Department);
+		}
+		_navigationManager.NavigateTo("department");
+	}
+}

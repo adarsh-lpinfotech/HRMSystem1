@@ -1,0 +1,130 @@
+﻿@page "/employee/create"
+@page "/employee/edit/{id:int}"
+
+@inject IEmployeeRepository _employeeRepository
+@inject NavigationManager _navigationManager
+
+<div class="row my-2">
+	<h3 class="card-title text-primary mb-3 ml-3">@Title Employee</h3>
+	<div class="col-10">
+		@if (IsLoading)
+		{
+			<div class="text-center">
+				<img src="/images/loader.gif">
+			</div>
+		}
+		else
+		{
+			<EditForm Model="Employee" OnValidSubmit="UpsertEmployee">
+				<DataAnnotationsValidator/>
+				<ValidationSummary />
+				<div class="form-group">
+					<label>First Name</label>
+					<InputText @bind-Value="Employee.FirstName" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.FirstName"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Middle Name</label>
+					<InputText @bind-Value="Employee.MiddleName" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.MiddleName"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Last Name</label>
+					<InputText @bind-Value="Employee.LastName" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.LastName"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Employee Code</label>
+					<InputText @bind-Value="Employee.Code" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.Code"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Address</label>
+					<InputText @bind-Value="Employee.Address" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.Address"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>City</label>
+					<InputText @bind-Value="Employee.City" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.City"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>State</label>
+					<InputText @bind-Value="Employee.State" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.State"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Country</label>
+					<InputText @bind-Value="Employee.Country" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.Country"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Postal Code</label>
+					<InputText @bind-Value="Employee.PostalCode" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.PostalCode"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Phone Number</label>
+					<InputText @bind-Value="Employee.PhoneNo" class="form-control"></InputText>
+					<ValidationMessage For="()=>Employee.PhoneNo"></ValidationMessage>
+				</div>
+				<div class="form-group">
+					<label>Department</label>
+					<InputNumber @bind-Value="Employee.DepartmentId" class="form-control"></InputNumber>
+					<ValidationMessage For="()=>Employee.Department"></ValidationMessage>
+				</div>
+
+				<div class="form-group py-2">
+					<button class="btn btn-primary">@Title</button>
+					<NavLink href="employee" class="btn btn-secondary">Back to Index</NavLink>
+				</div>
+			</EditForm>
+		}
+
+	</div>
+</div>
+
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private EmployeeDto Employee { get; set; } = new EmployeeDto();
+	private string Title { get; set; } = "Create";
+	private bool IsLoading { get; set; } = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (Id == 0)
+		{
+			// create
+			IsLoading = false;
+		}
+		else
+		{
+			// update
+			Title = "Update";
+			await Task.Run(LoadEmployees);
+		}
+	}
+	private void LoadEmployees()
+	{
+		Employee = _employeeRepository.Get(Id);
+		IsLoading = false;
+	}
+
+	private void UpsertEmployee()
+	{
+		if (Id == 0)
+		{
+			//create
+			_employeeRepository.Create(Employee);
+		}
+		else
+		{
+			//update
+			_employeeRepository.Update(Employee);
+		}
+		_navigationManager.NavigateTo("employee");
+	}
+}
